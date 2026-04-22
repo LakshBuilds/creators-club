@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const code = searchParams.get('code');
+  let code = searchParams.get('code');
 
   if (!code) return NextResponse.json({ error: 'No code' }, { status: 400 });
+
+  // Instagram appends #_ to the code sometimes
+  code = code.replace(/#_$/, '');
 
   try {
     // 1️⃣ Exchange code for short-lived token
