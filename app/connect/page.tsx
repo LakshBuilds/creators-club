@@ -1,7 +1,7 @@
 'use client';
 export default function ConnectPage() {
-  const scopes = 'instagram_basic,instagram_manage_insights,instagram_manage_comments,pages_show_list,pages_read_engagement';
-  const authUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.NEXT_PUBLIC_IG_APP_ID}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_URI!)}&scope=${scopes}&response_type=code`;
+  const scopes = 'instagram_business_basic,instagram_business_manage_insights,instagram_business_manage_comments';
+  const authUrl = `https://www.instagram.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_IG_APP_ID}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_URI!)}&scope=${scopes}&response_type=code`;
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50">

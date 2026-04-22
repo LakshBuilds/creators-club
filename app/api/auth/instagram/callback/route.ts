@@ -8,13 +8,23 @@ export async function GET(request: Request) {
 
   try {
     // 1️⃣ Exchange code for short-lived token
-    const tokenRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${process.env.NEXT_PUBLIC_IG_APP_ID}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_URI!)}&client_secret=${process.env.IG_APP_SECRET}&code=${code}`);
+    const tokenRes = await fetch('https://api.instagram.com/oauth/access_token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: process.env.NEXT_PUBLIC_IG_APP_ID,
+        client_secret: process.env.IG_APP_SECRET,
+        grant_type: 'authorization_code',
+        redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI,
+        code
+      })
+    });
     const tokenData = await tokenRes.json();
 
     if (tokenData.error) throw new Error(tokenData.error_message);
 
     // 2️⃣ Exchange for long-lived token (60 days)
-    const longRes = await fetch(`https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.NEXT_PUBLIC_IG_APP_ID}&client_secret=${process.env.IG_APP_SECRET}&fb_exchange_token=${tokenData.access_token}`);
+    const longRes = await fetch(`https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${process.env.IG_APP_SECRET}&access_token=${tokenData.access_token}`);
     const longData = await longRes.json();
 
     // 🟢 SUCCESS: Log token for now (store in DB later)
