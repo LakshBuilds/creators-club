@@ -2,9 +2,30 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  const oauthError = searchParams.get('error');
+  const oauthErrorDescription =
+    searchParams.get('error_description') ?? searchParams.get('error_reason');
+  if (oauthError) {
+    return NextResponse.json(
+      {
+        error: oauthError,
+        ...(oauthErrorDescription && { details: oauthErrorDescription })
+      },
+      { status: 400 }
+    );
+  }
+
   let code = searchParams.get('code');
 
-  if (!code) return NextResponse.json({ error: 'No code' }, { status: 400 });
+  if (!code) {
+    return NextResponse.json(
+      {
+        error: 'No authorization code',
+        hint: 'Open /connect and complete the Instagram login; if the URL has only a #fragment, the server cannot read the code.'
+      },
+      { status: 400 }
+    );
+  }
 
   // Instagram appends #_ to the code sometimes
   code = code.replace(/#_$/, '');
