@@ -30,7 +30,16 @@ export async function GET(request: Request) {
     // 🟢 SUCCESS: Log token for now (store in DB later)
     console.log('✅ LONG-LIVED TOKEN:', longData.access_token);
     console.log('🆔 IG USER ID:', tokenData.user_id);
-    console.log('⏳ EXPIRES IN:', longData.expires_in, 'seconds');
+
+    try {
+      const subRes = await fetch(`https://graph.instagram.com/v25.0/${tokenData.user_id}/subscribed_apps?subscribed_fields=comments,messages&access_token=${longData.access_token}`, {
+        method: 'POST'
+      });
+      const subData = await subRes.json();
+      console.log('🔔 WEBHOOK SUBSCRIPTION:', subData.success ? 'ENABLED' : 'FAILED', subData);
+    } catch (subErr) {
+      console.error('❌ Failed to enable webhook subscription:', subErr);
+    }
 
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_REDIRECT_URI!.replace('/api/auth/instagram/callback', '')}/dashboard?token=${longData.access_token}&user_id=${tokenData.user_id}`);
   } catch (err: any) {
