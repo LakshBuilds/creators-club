@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd creators-web && npm run build",
-  "outputDirectory": "creators-web/.next",
-  "installCommand": "cd creators-web && npm install"
-}
