@@ -8,16 +8,18 @@ export async function GET(request: Request) {
 
   try {
     // 1️⃣ Exchange code for short-lived token
+    const body = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_IG_APP_ID!,
+      client_secret: process.env.IG_APP_SECRET!,
+      grant_type: 'authorization_code',
+      redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI!,
+      code: code
+    });
+
     const tokenRes = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: process.env.NEXT_PUBLIC_IG_APP_ID,
-        client_secret: process.env.IG_APP_SECRET,
-        grant_type: 'authorization_code',
-        redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI,
-        code
-      })
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
     });
     const tokenData = await tokenRes.json();
 
