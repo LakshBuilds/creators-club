@@ -9,12 +9,17 @@ This project is a Next.js application designed for creators to connect their Ins
 
 ## 🛠️ Setup
 
-1. **Environment Variables**: Create a `.env` file with the following:
+1. **Environment Variables**: Create a `creators-web/.env` or repo-root `.env` (Next loads it) with:
    ```env
    NEXT_PUBLIC_IG_APP_ID=your_app_id
    IG_APP_SECRET=your_app_secret
-   NEXT_PUBLIC_REDIRECT_URI=http://localhost:3000/api/auth/instagram/callback
+   NEXT_PUBLIC_REDIRECT_URI=https://your-domain.netlify.app/api/auth/instagram/callback
    ```
+   Optional **root** `server.js` (ngrok) uses the same id/secret plus:
+   ```env
+   OAUTH_REDIRECT_URI=https://YOUR_NGROK_HOST/auth/callback
+   ```
+   Register **both** callback URLs in the Meta app if you use Netlify and ngrok. Shared OAuth settings (authorize URL, scopes) live in `config/instagram-oauth.json`.
 
 2. **Install Dependencies**:
    ```bash
@@ -27,9 +32,8 @@ This project is a Next.js application designed for creators to connect their Ins
    ```
 
 ## 🔐 OAuth Flow
-- Start at `/connect` to initiate the authorization.
-- Users are redirected to Facebook to grant permissions (`instagram_basic`, `instagram_manage_insights`, etc.).
-- The callback at `/api/auth/instagram/callback` handles the token exchange and redirects to the dashboard.
+- **Next.js**: `GET /api/auth/instagram` (or the link on `/connect`) sends users to `https://api.instagram.com/oauth/authorize` with the scopes in `config/instagram-oauth.json`. After login, `GET /api/auth/instagram/callback` exchanges the `code` for a short-lived token, exchanges again for a **60-day** long-lived token, fetches `graph.instagram.com/me` profile fields, and redirects to `/dashboard`.
+- **Local `server.js`** (repo root, default port **3001**): `GET /auth/instagram` → `GET /auth/callback` returns JSON (`access_token` is long-lived, `profile` from Graph). Set `OAUTH_REDIRECT_URI` to your public tunnel URL. Do not commit secrets.
 
 ## 📄 Compliance
 - **Privacy Policy**: Located at `/privacy.md`.
