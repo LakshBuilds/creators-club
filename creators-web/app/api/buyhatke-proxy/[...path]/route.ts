@@ -67,7 +67,11 @@ async function forward(request: Request, segments: string[]): Promise<NextRespon
 
   const upstreamHeaders: Record<string, string> = {
     "Content-Type": request.headers.get("content-type") ?? "application/json",
-    Accept: "application/json"
+    Accept: "application/json",
+    // The spend-apis service rejects cross-origin calls without buyhatke.com
+    // Origin/Referer; replicate what the buyhatke web bundle sends.
+    Origin: "https://buyhatke.com",
+    Referer: "https://buyhatke.com/"
   };
   const cookieHeader = serializeJar(jar);
   if (cookieHeader) upstreamHeaders.Cookie = cookieHeader;
