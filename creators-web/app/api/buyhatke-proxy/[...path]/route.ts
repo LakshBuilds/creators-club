@@ -65,6 +65,11 @@ async function forward(request: Request, segments: string[]): Promise<NextRespon
   const incomingSession = request.headers.get(SESSION_HEADER_IN);
   const jar = parseCookieHeader(incomingSession);
 
+  // Drop the userId=0 poison cookie BEFORE forwarding upstream. spend-apis
+  // sets it on every unauthenticated response and the buyhatke.com SSR uses
+  // it as an "anonymous" marker.
+  if (jar.get("userId") === "0") jar.delete("userId");
+
   const upstreamHeaders: Record<string, string> = {
     "Content-Type": request.headers.get("content-type") ?? "application/json",
     Accept: "application/json",
@@ -97,8 +102,6 @@ async function forward(request: Request, segments: string[]): Promise<NextRespon
     if (name === "userId" && (value === "0" || value === "")) continue;
     jar.set(name, value);
   }
-  // Also drop any pre-existing userId=0 from the incoming jar.
-  if (jar.get("userId") === "0") jar.delete("userId");
 
   const text = await upstream.text();
   const responseHeaders: Record<string, string> = {
