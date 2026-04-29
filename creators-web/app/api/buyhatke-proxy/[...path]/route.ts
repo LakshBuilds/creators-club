@@ -88,10 +88,17 @@ async function forward(request: Request, segments: string[]): Promise<NextRespon
   });
 
   // Merge any new cookies into the jar so the client-side state stays in sync.
+  // Skip "poison" cookies that downstream services set when they don't recognize
+  // the auth (notably spend-apis sets userId=0 on every unauth request, which
+  // would then propagate to other endpoints and break SSR detection of the
+  // logged-in user).
   const setCookie = upstream.headers.get("set-cookie");
   for (const [name, value] of parseSetCookie(setCookie)) {
+    if (name === "userId" && (value === "0" || value === "")) continue;
     jar.set(name, value);
   }
+  // Also drop any pre-existing userId=0 from the incoming jar.
+  if (jar.get("userId") === "0") jar.delete("userId");
 
   const text = await upstream.text();
   const responseHeaders: Record<string, string> = {

@@ -29,8 +29,19 @@ function pickReferralCode(html: string): string | null {
   return null;
 }
 
+function stripPoisonCookies(jar: string): string {
+  // spend-apis sets userId=0 when it sees no auth — sending that to the SSR
+  // page makes buyhatke.com render an anonymous view.
+  return jar
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s && !/^userId=0(\s|$)/.test(s))
+    .join("; ");
+}
+
 export async function GET(request: Request) {
-  const session = request.headers.get(SESSION_HEADER) ?? "";
+  const sessionRaw = request.headers.get(SESSION_HEADER) ?? "";
+  const session = stripPoisonCookies(sessionRaw);
   const headers: Record<string, string> = {
     Accept: "text/html,application/xhtml+xml",
     "User-Agent":
