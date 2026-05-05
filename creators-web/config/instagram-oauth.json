@@ -1,5 +1,5 @@
 {
-  "authBase": "https://api.instagram.com/oauth/authorize",
+  "authBase": "https://www.instagram.com/oauth/authorize",
   "accessTokenUrl": "https://api.instagram.com/oauth/access_token",
   "graphMe": "https://graph.instagram.com/me",
   "defaultScopes": "instagram_business_basic,instagram_business_manage_insights,instagram_business_manage_comments,instagram_business_manage_messages"

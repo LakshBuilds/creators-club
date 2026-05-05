@@ -12,8 +12,8 @@ function DashboardContent() {
   if (!userId) {
     return (
       <div className="mx-auto max-w-md p-8 text-center">
-        <p className="text-zinc-600">No session data. Start from Connect.</p>
-        <Link href="/connect" className="mt-4 inline-block text-pink-600 underline">
+        <p className="text-indigo-900/80">No session data. Start from Connect.</p>
+        <Link href="/connect" className="mt-4 inline-block text-indigo-800 underline">
           Connect Instagram
         </Link>
       </div>
@@ -22,8 +22,8 @@ function DashboardContent() {
 
   return (
     <div className="mx-auto max-w-md p-8">
-      <h1 className="text-2xl font-semibold text-zinc-900">Connected</h1>
-      <ul className="mt-4 space-y-2 text-left text-sm text-zinc-700">
+      <h1 className="text-2xl font-semibold text-indigo-950">Connected</h1>
+      <ul className="mt-4 space-y-2 text-left text-sm text-indigo-900/85">
         {userId && (
           <li>
             <span className="font-medium">User ID:</span> {userId}
@@ -34,7 +34,7 @@ function DashboardContent() {
             <span className="font-medium">Username:</span> @{username}
           </li>
         )}
-        <li className="text-zinc-500">Token stored server-side in Supabase.</li>
+        <li className="text-indigo-700/70">Token stored server-side in Supabase.</li>
       </ul>
     </div>
   );
@@ -42,8 +42,8 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <Suspense fallback={<p className="p-8 text-center text-zinc-500">Loading…</p>}>
+    <div className="min-h-screen bg-indigo-50">
+      <Suspense fallback={<p className="p-8 text-center text-indigo-700/70">Loading…</p>}>
         <DashboardContent />
       </Suspense>
     </div>
