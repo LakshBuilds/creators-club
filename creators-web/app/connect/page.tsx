@@ -8,11 +8,11 @@ export default function ConnectPage() {
   const authUrl = appId && redirect ? buildInstagramAuthorizeUrl(appId, redirect) : "#";
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6">Connect Instagram</h1>
+    <div className="flex h-screen flex-col items-center justify-center bg-indigo-50">
+      <h1 className="mb-6 text-3xl font-bold text-indigo-950">Connect Instagram</h1>
       <a
         href={authUrl}
-        className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 rounded-lg font-medium transition"
+        className="rounded-lg bg-indigo-800 px-8 py-3 font-medium text-white transition hover:bg-indigo-900"
         aria-disabled={!appId || !redirect}
       >
         Authorize Instagram

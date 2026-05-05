@@ -6,6 +6,8 @@ export async function GET(request: Request) {
   const platform = searchParams.get("platform") === "mobile" ? "mobile" : "web";
 
   const params = new URLSearchParams({
+    enable_fb_login: "0",
+    force_authentication: "1",
     client_id: process.env.NEXT_PUBLIC_IG_APP_ID!,
     redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI!,
     response_type: "code",
