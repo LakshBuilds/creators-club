@@ -115,7 +115,8 @@ export async function POST(request: Request) {
   if (list.error) {
     return NextResponse.json({ error: list.error.message }, { status: 500 });
   }
-  let user = list.data.users.find((u) => u.email?.toLowerCase() === email);
+  const existing = list.data.users.find((u) => u.email?.toLowerCase() === email);
+  let user = existing;
   if (!user) {
     const created = await admin.auth.admin.createUser({
       email,
@@ -128,6 +129,9 @@ export async function POST(request: Request) {
       );
     }
     user = created.data.user;
+  }
+  if (!user) {
+    return NextResponse.json({ error: "user_resolve_failed" }, { status: 500 });
   }
 
   // Refuse sign-in for paused accounts. Pause is a self-service "freeze me"
