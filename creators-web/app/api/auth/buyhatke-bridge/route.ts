@@ -130,6 +130,26 @@ export async function POST(request: Request) {
     user = created.data.user;
   }
 
+  // Refuse sign-in for paused accounts. Pause is a self-service "freeze me"
+  // toggle; unpausing requires emailing support, who flips the flag in admin.
+  const { data: paused, error: pausedErr } = await admin
+    .from("profiles")
+    .select("paused")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (pausedErr) {
+    return NextResponse.json({ error: pausedErr.message }, { status: 500 });
+  }
+  if (paused?.paused === true) {
+    return NextResponse.json(
+      {
+        error: "account_paused",
+        message: "Your account is paused. Email support@buyhatke.com to reactivate."
+      },
+      { status: 403 }
+    );
+  }
+
   const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
   if (link.error || !link.data?.properties?.hashed_token) {
     return NextResponse.json(
