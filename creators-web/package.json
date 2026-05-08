@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "kill-port 3000; next dev -p 3000",
     "dev:3001": "next dev -p 3001",
-    "dev:ngrok": "kill-port 3000; kill-port 3001; next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
