@@ -111,24 +111,21 @@ export async function POST(request: Request) {
     auth: { persistSession: false, autoRefreshToken: false }
   });
 
-  const list = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (list.error) {
-    return NextResponse.json({ error: list.error.message }, { status: 500 });
+  // Try to create the user. If the email is already registered we fall
+  // through (generateLink works for existing users too). Skipping the O(N)
+  // listUsers scan saves 1-3s per sign-in and keeps the bridge fast as
+  // the user table grows.
+  const created = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true
+  });
+  if (
+    created.error &&
+    !/already.*registered|already exists|duplicate|email_exists/i.test(created.error.message)
+  ) {
+    return NextResponse.json({ error: created.error.message }, { status: 500 });
   }
-  let user = list.data.users.find((u) => u.email?.toLowerCase() === email);
-  if (!user) {
-    const created = await admin.auth.admin.createUser({
-      email,
-      email_confirm: true
-    });
-    if (created.error || !created.data.user) {
-      return NextResponse.json(
-        { error: created.error?.message ?? "createUser failed" },
-        { status: 500 }
-      );
-    }
-    user = created.data.user;
-  }
+  const user = created.data?.user ?? null;
 
   const link = await admin.auth.admin.generateLink({ type: "magiclink", email });
   if (link.error || !link.data?.properties?.hashed_token) {
@@ -152,9 +149,14 @@ export async function POST(request: Request) {
     );
   }
 
+  // Prefer the user object the verify session returned (always present);
+  // `user` from createUser is null when the email already existed.
+  const sessionUser = verify.data.user ?? user;
   return NextResponse.json({
     access_token: verify.data.session.access_token,
     refresh_token: verify.data.session.refresh_token,
-    user: { id: user.id, email: user.email }
+    user: sessionUser
+      ? { id: sessionUser.id, email: sessionUser.email }
+      : { id: null, email }
   });
 }
