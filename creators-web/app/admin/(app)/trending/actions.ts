@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getAdminClient } from "@/lib/admin-supabase";
 import { fetchOgImage } from "@/lib/og-image";
+import { selfHostImage } from "@/lib/poster-storage";
 
 type Table = "trending_reels" | "trending_products" | "trending_audio";
 
@@ -18,6 +19,9 @@ export async function createReel(formData: FormData) {
   if (!video_url) return;
   let poster_url = String(formData.get("poster_url") ?? "").trim() || null;
   if (!poster_url) poster_url = await fetchOgImage(video_url);
+  // Re-host on our own Storage bucket so the URL never expires when
+  // Instagram's signed CDN URL TTL runs out (roughly weekly).
+  if (poster_url) poster_url = await selfHostImage(poster_url, { keyPrefix: "reels" });
   await supabase.from("trending_reels").insert({
     video_url,
     poster_url,
@@ -50,6 +54,8 @@ export async function createAudio(formData: FormData) {
   const preview_url = String(formData.get("preview_url") ?? "").trim() || null;
   let cover_url = String(formData.get("cover_url") ?? "").trim() || null;
   if (!cover_url && preview_url) cover_url = await fetchOgImage(preview_url);
+  // Re-host so the URL stops depending on IG's expiring CDN signatures.
+  if (cover_url) cover_url = await selfHostImage(cover_url, { keyPrefix: "audio" });
   await supabase.from("trending_audio").insert({
     title,
     artist: String(formData.get("artist") ?? "").trim() || null,
