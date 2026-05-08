@@ -82,9 +82,12 @@ export async function GET(request: Request) {
       );
     }
 
-    // Diagnostic: ask Meta what app/scopes this short-lived token belongs to.
-    // Helps confirm the app is configured for "Instagram API with Instagram Login"
-    // and that the right scopes came through.
+    // Diagnostic + scope capture: ask Meta what scopes this token was granted
+    // so we know which permissions the user actually approved on the consent
+    // screen. Per Meta Developer Policy 6.2, our app must handle the case
+    // where a user grants a subset of requested permissions — we surface the
+    // granted list to mobile so it can hide features the user denied.
+    let grantedScopes: string[] = [];
     try {
       const dbgUrl = new URL("https://graph.facebook.com/debug_token");
       dbgUrl.searchParams.set("input_token", shortToken);
@@ -98,6 +101,8 @@ export async function GET(request: Request) {
         status: dbgRes.status,
         body: dbgBody
       });
+      const scopes = dbgBody?.data?.scopes;
+      if (Array.isArray(scopes)) grantedScopes = scopes.map(String);
     } catch (dbgErr) {
       console.warn("[ig-callback] debug_token failed", dbgErr);
     }
@@ -201,7 +206,10 @@ export async function GET(request: Request) {
       const mq = new URLSearchParams({
         access_token: longToken,
         user_id: igUserId,
-        ...(profile.username ? { username: profile.username } : {})
+        ...(profile.username ? { username: profile.username } : {}),
+        // Comma-joined granted scopes so mobile can hide features the user
+        // denied on the consent screen (Developer Policy 6.2 partial grants).
+        ...(grantedScopes.length ? { scopes: grantedScopes.join(",") } : {})
       });
       return NextResponse.redirect(`${mobileScheme}://auth?${mq.toString()}`);
     }
