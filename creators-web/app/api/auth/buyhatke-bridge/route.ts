@@ -127,12 +127,14 @@ export async function POST(request: Request) {
   }
   const user = created.data?.user ?? null;
 
-  // Refuse sign-in for paused accounts. Pause is a self-service "freeze me"
-  // toggle; unpausing requires emailing support, who flips the flag in admin.
+  // Refuse sign-in for paused accounts. We can't go by user.id here — when the
+  // email already existed createUser returns null, so we look up the profile
+  // by email instead. Pause is a self-service "freeze me" toggle; unpausing
+  // requires emailing support, who flips the flag in admin.
   const { data: paused, error: pausedErr } = await admin
     .from("profiles")
     .select("paused")
-    .eq("id", user.id)
+    .eq("email", email)
     .maybeSingle();
   if (pausedErr) {
     return NextResponse.json({ error: pausedErr.message }, { status: 500 });
