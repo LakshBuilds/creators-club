@@ -115,15 +115,25 @@ export async function POST(request: Request) {
   // through (generateLink works for existing users too). Skipping the O(N)
   // listUsers scan saves 1-3s per sign-in and keeps the bridge fast as
   // the user table grows.
+  //
+  // Only swallow the "email already registered" family of errors. Anything
+  // else (e.g. "Database error saving new user" from a trigger throwing on a
+  // unique violation against a stale profile row) must surface — otherwise we
+  // hand the client a session for a user whose profile doesn't exist and the
+  // app spins forever on the loadOnboarding query.
   const created = await admin.auth.admin.createUser({
     email,
     email_confirm: true
   });
-  if (
-    created.error &&
-    !/already.*registered|already exists|duplicate|email_exists/i.test(created.error.message)
-  ) {
-    return NextResponse.json({ error: created.error.message }, { status: 500 });
+  if (created.error) {
+    const msg = created.error.message ?? "";
+    const benign = /(already.*registered|already exists|email[_ ]exists|user[_ ]already)/i.test(msg);
+    if (!benign) {
+      return NextResponse.json(
+        { error: "create_user_failed", message: msg },
+        { status: 500 }
+      );
+    }
   }
   const user = created.data?.user ?? null;
 
