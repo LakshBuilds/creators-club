@@ -33,7 +33,7 @@ export default async function SupportPage() {
     <div>
       <h1 className="text-2xl font-semibold text-indigo-950">Support tickets</h1>
       <p className="mt-1 text-sm text-indigo-900/80">
-        Tickets are opened when a creator hits "Talk to a human" in the chatbot.
+        Tickets are opened when a creator hits &ldquo;Talk to a human&rdquo; in the chatbot.
       </p>
 
       {items.length === 0 ? (

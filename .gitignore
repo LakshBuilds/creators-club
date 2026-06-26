@@ -26,3 +26,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify tooling artifacts
+.venv-graphify/
+graphify-out/

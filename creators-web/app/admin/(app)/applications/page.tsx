@@ -88,7 +88,7 @@ export default async function ApplicationsPage() {
         <Card className="mt-6">
           <CardTitle>No applications yet</CardTitle>
           <CardDescription>
-            Once a creator taps "Apply" on a campaign, they appear here.
+            Once a creator taps &ldquo;Apply&rdquo; on a campaign, they appear here.
           </CardDescription>
         </Card>
       ) : (
