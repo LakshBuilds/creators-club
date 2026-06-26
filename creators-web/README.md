@@ -36,5 +36,7 @@ This project is a Next.js application designed for creators to connect their Ins
 - **Local `server.js`** (repo root, default port **3001**): `GET /auth/instagram` → `GET /auth/callback` returns JSON (`access_token` is long-lived, `profile` from Graph). Set `OAUTH_REDIRECT_URI` to your public tunnel URL. Do not commit secrets.
 
 ## 📄 Compliance
-- **Privacy Policy**: Located at `/privacy.md`.
-- **Scopes**: Uses official Instagram Graph API scopes required for professional account insights.
+- **Privacy Policy**: Hosted at `/privacy` (route `app/privacy/page.tsx`); repo mirror in root `privacy.md`. This is the URL submitted for Meta App Review.
+- **Terms of Service**: Hosted at `/terms` (route `app/terms/page.tsx`).
+- **Data Deletion**: Meta deletion callback at `/api/auth/instagram/data-deletion`; user-facing status page at `/data-deletion-status`.
+- **Scopes**: Uses official Instagram Graph API scopes required for professional account insights (see `config/instagram-oauth.json`).

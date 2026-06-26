@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Buyhatke Creators",
+    "slug": "buyhatke-creators",
+    "version": "1.0.0",
+    "scheme": "creatorsclub",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.creatorsclub.mobile"
+    },
+    "android": {
+      "package": "com.creatorsclub.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "serverUrl": "https://hatkecreators.netlify.app",
+      "router": {},
+      "eas": {
+        "projectId": "20137122-78c5-4845-8d73-5fde15f4521f"
+      }
+    },
+    "plugins": [
+      "expo-web-browser",
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "owner": "laksh_mahajan",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/20137122-78c5-4845-8d73-5fde15f4521f"
+    }
+  }
+}

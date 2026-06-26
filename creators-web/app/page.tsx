@@ -77,7 +77,7 @@ export default function Home() {
             How Creators Club uses your Instagram
           </h2>
           <p className="mt-3 max-w-2xl text-base text-indigo-900/80">
-            We use Meta's Instagram Graph API to fetch only the data we need
+            We use Meta&apos;s Instagram Graph API to fetch only the data we need
             to verify your account and surface insights. We never post to
             your Instagram without your explicit confirmation per Reel.
           </p>
