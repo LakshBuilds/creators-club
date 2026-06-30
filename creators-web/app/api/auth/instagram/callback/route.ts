@@ -34,7 +34,22 @@ export async function GET(request: Request) {
 
   code = code.replace(/#_$/, "");
 
-  const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI!;
+  // The token exchange's redirect_uri must be byte-identical to the one used in
+  // the authorize dialog. Instagram only delivers the code to the *registered*
+  // redirect_uri, which is exactly the URL this callback is now serving — so we
+  // reconstruct it from the incoming request instead of trusting
+  // NEXT_PUBLIC_REDIRECT_URI (which can drift between the mobile build and the
+  // deployed server env, causing "redirect_uri is not identical" errors).
+  const fwdProto = request.headers.get("x-forwarded-proto") ?? "https";
+  const fwdHost =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const redirectUri = fwdHost
+    ? `${fwdProto}://${fwdHost}/api/auth/instagram/callback`
+    : process.env.NEXT_PUBLIC_REDIRECT_URI!;
+  console.log("[ig-callback] using redirect_uri for token exchange", {
+    redirectUri,
+    fromEnv: process.env.NEXT_PUBLIC_REDIRECT_URI
+  });
 
   try {
     const body = new URLSearchParams({
