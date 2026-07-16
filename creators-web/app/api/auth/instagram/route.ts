@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { instagramOAuthConfig } from "@/lib/instagram-oauth";
+import {
+  instagramOAuthConfig,
+  INSTAGRAM_REDIRECT_URI
+} from "@/lib/instagram-oauth";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,7 +12,7 @@ export async function GET(request: Request) {
     enable_fb_login: "0",
     force_authentication: "1",
     client_id: process.env.NEXT_PUBLIC_IG_APP_ID!,
-    redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI!,
+    redirect_uri: INSTAGRAM_REDIRECT_URI,
     response_type: "code",
     scope: instagramOAuthConfig.defaultScopes,
     state: platform

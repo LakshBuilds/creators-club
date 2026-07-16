@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import {
   instagramOAuthConfig,
-  originFromRedirectUri
+  originFromRedirectUri,
+  INSTAGRAM_REDIRECT_URI
 } from "@/lib/instagram-oauth";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 
@@ -35,17 +36,12 @@ export async function GET(request: Request) {
   code = code.replace(/#_$/, "");
 
   // The token exchange's redirect_uri must be byte-identical to the one used in
-  // the authorize dialog. Instagram only delivers the code to the *registered*
-  // redirect_uri, which is exactly the URL this callback is now serving — so we
-  // reconstruct it from the incoming request instead of trusting
-  // NEXT_PUBLIC_REDIRECT_URI (which can drift between the mobile build and the
-  // deployed server env, causing "redirect_uri is not identical" errors).
-  const fwdProto = request.headers.get("x-forwarded-proto") ?? "https";
-  const fwdHost =
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const redirectUri = fwdHost
-    ? `${fwdProto}://${fwdHost}/api/auth/instagram/callback`
-    : process.env.NEXT_PUBLIC_REDIRECT_URI!;
+  // the authorize dialog. Both sides now use the single canonical
+  // INSTAGRAM_REDIRECT_URI (the value registered in Meta and baked into the
+  // mobile build), so they can never drift. We deliberately do NOT reconstruct
+  // from x-forwarded-host — that varies by custom domain / branch deploy / proxy
+  // and caused the "redirect_uri is not identical" errors.
+  const redirectUri = INSTAGRAM_REDIRECT_URI;
   console.log("[ig-callback] using redirect_uri for token exchange", {
     redirectUri,
     fromEnv: process.env.NEXT_PUBLIC_REDIRECT_URI
