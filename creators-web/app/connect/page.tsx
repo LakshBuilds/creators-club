@@ -1,11 +1,16 @@
 "use client";
 
-import { buildInstagramAuthorizeUrl } from "@/lib/instagram-oauth";
+import {
+  buildInstagramAuthorizeUrl,
+  INSTAGRAM_REDIRECT_URI
+} from "@/lib/instagram-oauth";
 
 export default function ConnectPage() {
   const appId = process.env.NEXT_PUBLIC_IG_APP_ID;
-  const redirect = process.env.NEXT_PUBLIC_REDIRECT_URI;
-  const authUrl = appId && redirect ? buildInstagramAuthorizeUrl(appId, redirect) : "#";
+  // Single canonical redirect_uri (env or hardcoded production fallback) so the
+  // authorize dialog matches the server-side token exchange byte-for-byte.
+  const redirect = INSTAGRAM_REDIRECT_URI;
+  const authUrl = appId ? buildInstagramAuthorizeUrl(appId, redirect) : "#";
 
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-indigo-50">
@@ -13,7 +18,7 @@ export default function ConnectPage() {
       <a
         href={authUrl}
         className="rounded-lg bg-indigo-800 px-8 py-3 font-medium text-white transition hover:bg-indigo-900"
-        aria-disabled={!appId || !redirect}
+        aria-disabled={!appId}
       >
         Authorize Instagram
       </a>
