@@ -78,8 +78,9 @@ export default function Home() {
           </h2>
           <p className="mt-3 max-w-2xl text-base text-indigo-900/80">
             We use Meta&apos;s Instagram Graph API to fetch only the data we need
-            to verify your account and surface insights. We never post to
-            your Instagram without your explicit confirmation per Reel.
+            to verify your account and surface insights. We only comment or send
+            DMs on Reels where you&apos;ve set up an automation rule, and you can
+            turn it off anytime.
           </p>
           <div className="mt-8 grid gap-6 md:grid-cols-2">
             <Step
@@ -99,8 +100,8 @@ export default function Home() {
             />
             <Step
               n="4"
-              title="Post and reply to comments"
-              body="Once approved, post the Reel to your Instagram. AI suggests replies to brand-related comments — you review and approve every reply before it's sent."
+              title="Automate replies to your comments"
+              body="Set up an Auto-DM rule on any Reel with a trigger keyword. When a viewer comments that keyword, Creators Club automatically sends them the DM you wrote and posts a public reply. You configure it once per Reel and can turn it off anytime."
             />
           </div>
         </section>
