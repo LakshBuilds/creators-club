@@ -14,8 +14,8 @@ export default function TermsPage() {
 
       <Section title="1. Who we are">
         <p>
-          Buyhatke Creators (the &quot;app&quot;) is operated by Compare Hatke
-          Pvt. Ltd., the company behind buyhatke.com (&quot;Buyhatke&quot;,
+          Buyhatke Creators (the &quot;app&quot;) is operated by BuyHatke Tech
+          Private Limited, the company behind buyhatke.com (&quot;Buyhatke&quot;,
           &quot;we&quot;, &quot;us&quot;). By signing in to the app you agree
           to these terms.
         </p>
@@ -168,7 +168,7 @@ export default function TermsPage() {
 
       <Section title="12. Contact">
         <p>
-          Compare Hatke Pvt. Ltd.
+          BuyHatke Tech Private Limited
           <br />
           Email:{" "}
           <a className="underline" href="mailto:support@buyhatke.com">

@@ -9,7 +9,7 @@
 This policy explains what data Buyhatke Creators (the "app", "we", "us")
 collects when you use our mobile app and web admin dashboard, why we collect
 it, who we share it with, how long we keep it, and how you can ask us to delete
-it. The app is operated by **Compare Hatke Pvt. Ltd. ("Buyhatke")**, the entity
+it. The app is operated by **BuyHatke Tech Private Limited ("Buyhatke")**, the entity
 behind buyhatke.com.
 
 ## 1. What this app does
@@ -102,6 +102,6 @@ updated" date. Material changes will be announced inside the app at least 14
 days before they take effect.
 
 ## 10. Contact
-Compare Hatke Pvt. Ltd.
+BuyHatke Tech Private Limited
 Email: support@buyhatke.com
 See also: https://hatkecreators.netlify.app/terms
