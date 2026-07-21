@@ -43,6 +43,11 @@ function AuthGate() {
     const top = segments[0];
     const inAuthGroup = top === "(auth)";
     const inOnboardingGroup = top === "(onboarding)";
+    // The Instagram OAuth deep-link handler (app/auth.tsx). It finishes linking
+    // and routes onward itself, so AuthGate must not yank it back to onboarding
+    // mid-flow.
+    const inAuthCallback = top === "auth";
+    if (inAuthCallback) return;
 
     if (!session) {
       if (!inAuthGroup) router.replace("/(auth)/sign-in");
@@ -95,6 +100,7 @@ function AuthGate() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(onboarding)" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="auth" />
     </Stack>
   );
 }
