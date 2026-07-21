@@ -18,7 +18,7 @@ export default function PrivacyPage() {
           &quot;we&quot;, &quot;us&quot;) collects when you use our mobile app
           and web admin dashboard, why we collect it, who we share it with, how
           long we keep it, and how you can ask us to delete it. The app is
-          operated by Compare Hatke Pvt. Ltd. (&quot;Buyhatke&quot;), the entity
+          operated by BuyHatke Tech Private Limited (&quot;Buyhatke&quot;), the entity
           behind buyhatke.com.
         </p>
       </section>
@@ -189,7 +189,7 @@ export default function PrivacyPage() {
 
       <Section title="10. Contact">
         <p>
-          Compare Hatke Pvt. Ltd.
+          BuyHatke Tech Private Limited
           <br />
           Email:{" "}
           <a className="underline" href="mailto:support@buyhatke.com">
