@@ -23,7 +23,9 @@ import { PrimaryButton } from "../components/PrimaryButton";
 import { brand } from "../theme/tokens";
 import {
   fetchIgRecentMedia,
+  fetchLatestIgComment,
   isVideoMedia,
+  sendIgPrivateReply,
   type IgRecentMedia
 } from "../lib/instagramOAuth";
 import { createLogger } from "../lib/logger";
@@ -291,6 +293,7 @@ export default function AutoDmScreen() {
       <RuleEditorModal
         reel={editing}
         rule={editing ? rules[editing.id] ?? null : null}
+        creatorToken={creator?.ig_long_lived_token ?? null}
         onClose={() => setEditing(null)}
         onSave={saveRule}
       />
@@ -380,11 +383,13 @@ function IntroView({ onCreate }: { onCreate: () => void }) {
 function RuleEditorModal({
   reel,
   rule,
+  creatorToken,
   onClose,
   onSave
 }: {
   reel: IgRecentMedia | null;
   rule: AutoDmRule | null;
+  creatorToken: string | null;
   onClose: () => void;
   onSave: (rule: AutoDmRule) => void | Promise<void>;
 }) {
@@ -393,6 +398,7 @@ function RuleEditorModal({
   const [keyword, setKeyword] = useState("");
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (!rule) return;
@@ -427,6 +433,42 @@ function RuleEditorModal({
       });
     } finally {
       setSaving(false);
+    }
+  }
+
+  // Live send action for App Review: fire the DM as a private reply to the most
+  // recent comment on this reel, straight from the app UI. Instagram only allows
+  // a DM as a reply to a user-initiated comment, so there must be a comment first.
+  async function onSendNow() {
+    if (!rule || !reel) return;
+    if (!creatorToken) {
+      Alert.alert("Connect Instagram first", "Reconnect your Instagram account, then try again.");
+      return;
+    }
+    if (!dm.trim()) {
+      Alert.alert("Add a DM message first");
+      return;
+    }
+    setSending(true);
+    try {
+      const comment = await fetchLatestIgComment(reel.id, creatorToken);
+      if (!comment) {
+        Alert.alert(
+          "No comment to reply to yet",
+          "Comment on this reel from another Instagram account, then tap Send now."
+        );
+        return;
+      }
+      await sendIgPrivateReply(rule.ig_user_id, comment.id, dm.trim(), creatorToken);
+      Alert.alert(
+        "Sent ✓",
+        "The DM was sent as a private reply to the latest commenter. Open that account’s Instagram inbox to see it."
+      );
+    } catch (e) {
+      log.error("send now failed", e);
+      Alert.alert("Couldn’t send", toUserMessage(e));
+    } finally {
+      setSending(false);
     }
   }
 
@@ -491,6 +533,31 @@ function RuleEditorModal({
             </View>
 
             <PrimaryButton label="Save" onPress={onSubmit} loading={saving} />
+
+            <Pressable
+              onPress={onSendNow}
+              disabled={sending}
+              style={({ pressed }) => [styles.testBtn, pressed && { opacity: 0.85 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Send a test reply now"
+            >
+              {sending ? (
+                <ActivityIndicator color={colors.brand.primary} />
+              ) : (
+                <>
+                  <Ionicons
+                    name="paper-plane-outline"
+                    size={16}
+                    color={colors.brand.primary}
+                  />
+                  <Text style={styles.testBtnText}>Send now (test reply)</Text>
+                </>
+              )}
+            </Pressable>
+            <Text style={styles.testHint}>
+              Sends the DM above as a private reply to the most recent comment on
+              this reel — use it to preview the automation.
+            </Text>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -585,6 +652,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginVertical: spacing.md
+  },
+  testBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.md,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.brand.primary,
+    backgroundColor: colors.surface.card,
+    minHeight: 48
+  },
+  testBtnText: {
+    ...typography.bodyStrong,
+    color: colors.brand.primary
+  },
+  testHint: {
+    ...typography.caption,
+    color: colors.text.muted,
+    marginTop: spacing.xs,
+    textAlign: "center"
   },
   introContent: {
     paddingHorizontal: spacing.xl,

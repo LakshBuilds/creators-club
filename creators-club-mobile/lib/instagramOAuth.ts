@@ -182,6 +182,57 @@ export async function fetchIgMe(accessToken: string) {
 }
 
 /**
+ * Most recent comment on a media item. Used by the Auto-DM editor's "Send now"
+ * test action, which needs a comment_id to reply to (Instagram only allows a
+ * DM as a private reply to a user-initiated comment).
+ */
+export async function fetchLatestIgComment(
+  mediaId: string,
+  accessToken: string
+): Promise<{ id: string; text?: string } | null> {
+  const u = new URL(`${IG_GRAPH_BASE}/v25.0/${mediaId}/comments`);
+  u.searchParams.set("fields", "id,text,timestamp");
+  u.searchParams.set("access_token", accessToken);
+  const res = await fetch(u.toString());
+  const body = await res.json();
+  if (body.error) throw new Error(body.error.message ?? "Meta API error");
+  const list = (body.data ?? []) as Array<{ id: string; text?: string }>;
+  // The Graph API returns newest-first; take the first entry.
+  return list.length ? { id: list[0].id, text: list[0].text } : null;
+}
+
+/**
+ * Send a direct message as a private reply to a comment. Requires
+ * instagram_business_manage_messages. This is the same call the server's
+ * auto-DM webhook makes; exposed on the client so the app can demonstrate a
+ * live send action from its own UI (App Review requirement).
+ */
+export async function sendIgPrivateReply(
+  igUserId: string,
+  commentId: string,
+  message: string,
+  accessToken: string
+): Promise<void> {
+  const res = await fetch(`${IG_GRAPH_BASE}/v25.0/${igUserId}/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      recipient: { comment_id: commentId },
+      message: { text: message }
+    })
+  });
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: { message?: string };
+  };
+  if (!res.ok || body.error) {
+    throw new Error(body?.error?.message ?? `Send failed (${res.status})`);
+  }
+}
+
+/**
  * Graph `account_type` is `BUSINESS`, `MEDIA_CREATOR`, or `PERSONAL`.
  * Meta does not allow third-party apps to flip Personal → Professional — the user must do that in Instagram.
  */
