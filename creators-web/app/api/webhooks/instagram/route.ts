@@ -77,10 +77,16 @@ export async function POST(request: Request) {
     const data = JSON.parse(rawBody) as IgWebhookPayload;
     console.log("📩 RECEIVED WEBHOOK:", JSON.stringify(data, null, 2));
 
-    // Process comment events out-of-band so the webhook responds within Meta's tight SLO.
-    void processCommentEvents(data).catch((err) => {
+    // Process the events BEFORE responding. On serverless (Netlify/AWS Lambda)
+    // the function is frozen the moment we return, so fire-and-forget async work
+    // (`void processCommentEvents(...)`) never completes — the DM + comment reply
+    // silently never get sent. Awaiting keeps the work inside the invocation; the
+    // rule lookup + two Graph calls finish well within Meta's webhook timeout.
+    try {
+      await processCommentEvents(data);
+    } catch (err) {
       console.error("auto-dm: processing failed", err);
-    });
+    }
 
     return NextResponse.json({ status: "ok" });
   } catch (err) {
