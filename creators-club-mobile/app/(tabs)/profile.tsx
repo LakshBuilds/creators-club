@@ -31,6 +31,7 @@ import {
   type IgRecentMedia
 } from "../../lib/instagramOAuth";
 import { saveSummary } from "../../lib/creatorScore";
+import { igAdvancedEnabled } from "../../lib/features";
 import { createLogger } from "../../lib/logger";
 import { useSession } from "../../lib/session";
 import { supabase } from "../../lib/supabase";
@@ -71,6 +72,13 @@ export default function ProfileScreen() {
 
   const openMediaInsights = useCallback(
     async (item: IgRecentMedia) => {
+      // Insights (reach/views) need manage_insights, which isn't approved for
+      // public accounts yet. For them, tapping a post just opens it in
+      // Instagram instead of the (would-fail) insights sheet.
+      if (!igAdvancedEnabled(creator?.ig_username)) {
+        if (item.permalink) Linking.openURL(item.permalink).catch(() => {});
+        return;
+      }
       setSelectedMedia(item);
       setSelectedMetrics(null);
       const token = creator?.ig_long_lived_token;
@@ -91,7 +99,7 @@ export default function ProfileScreen() {
         setSelectedLoading(false);
       }
     },
-    [creator?.ig_long_lived_token]
+    [creator?.ig_long_lived_token, creator?.ig_username]
   );
 
   const closeMediaInsights = useCallback(() => {
@@ -141,7 +149,12 @@ export default function ProfileScreen() {
       const initialSummary = summarizeEngagement(me, media);
       setInsights(initialSummary);
       void saveSummary(initialSummary);
-      await attachIgMediaInsights(media, token);
+      // reach/views come from manage_insights, which is test-users-only until
+      // re-approval. Skip the insights fetch for public accounts — the basic
+      // summary (followers, likes) is all their UI shows.
+      if (igAdvancedEnabled(creator.ig_username)) {
+        await attachIgMediaInsights(media, token);
+      }
       setRecentMedia([...media]);
       const finalSummary = summarizeEngagement(me, media);
       setInsights(finalSummary);
@@ -211,6 +224,7 @@ export default function ProfileScreen() {
   const displayName =
     profile?.full_name?.trim() || userDisplayName(session?.user);
   const savedHandle = creator?.ig_username ?? null;
+  const igAdvanced = igAdvancedEnabled(savedHandle);
   const niches = creator?.categories ?? [];
 
   return (
@@ -253,17 +267,23 @@ export default function ProfileScreen() {
             value={formatCount(insights?.followers) ?? (savedHandle ? "—" : "0")}
           />
           <Divider />
-          <StatCard
-            label="Engagement %"
-            value={
-              insights?.engagementPct != null
-                ? `${insights.engagementPct.toFixed(1)}%`
-                : "—"
-            }
-          />
-          <Divider />
-          <StatCard label="Avg Reach" value={formatCount(insights?.avgReach) ?? "—"} />
-          <Divider />
+          {/* Engagement % and Avg Reach come from manage_insights — hidden for
+              public accounts until that permission is re-approved. */}
+          {igAdvanced ? (
+            <>
+              <StatCard
+                label="Engagement %"
+                value={
+                  insights?.engagementPct != null
+                    ? `${insights.engagementPct.toFixed(1)}%`
+                    : "—"
+                }
+              />
+              <Divider />
+              <StatCard label="Avg Reach" value={formatCount(insights?.avgReach) ?? "—"} />
+              <Divider />
+            </>
+          ) : null}
           <StatCard label="Avg Likes" value={formatCount(insights?.avgLikes) ?? "—"} />
         </View>
 
@@ -299,8 +319,12 @@ export default function ProfileScreen() {
               )}
               <Text style={styles.hint}>
                 {savedHandle
-                  ? "Connected via Meta — followers, reach and engagement refresh automatically."
-                  : "Login once — we fetch followers, reach, and engagement directly from Meta."}
+                  ? igAdvanced
+                    ? "Connected via Meta — followers, reach and engagement refresh automatically."
+                    : "Connected via Meta — your follower count refreshes automatically."
+                  : igAdvanced
+                    ? "Login once — we fetch followers, reach, and engagement directly from Meta."
+                    : "Login once — we fetch your Instagram profile directly from Meta."}
               </Text>
             </>
           )}
