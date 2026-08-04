@@ -28,6 +28,7 @@ import {
   sendIgPrivateReply,
   type IgRecentMedia
 } from "../lib/instagramOAuth";
+import { igAdvancedEnabled } from "../lib/features";
 import { createLogger } from "../lib/logger";
 import { useSession } from "../lib/session";
 import { supabase } from "../lib/supabase";
@@ -46,6 +47,7 @@ const DEFAULT_REPLIES = [
 type CreatorRow = {
   ig_user_id: string | null;
   ig_long_lived_token: string | null;
+  ig_username: string | null;
 };
 
 type AutoDmRule = {
@@ -95,7 +97,7 @@ export default function AutoDmScreen() {
     if (!userId) return;
     const { data, error } = await supabase
       .from("creators")
-      .select("ig_user_id, ig_long_lived_token")
+      .select("ig_user_id, ig_long_lived_token, ig_username")
       .eq("profile_id", userId)
       .maybeSingle();
     if (error) log.error("creator fetch failed", error);
@@ -230,6 +232,18 @@ export default function AutoDmScreen() {
               <Text style={styles.emptyTitle}>Connect Instagram first</Text>
               <Text style={styles.emptyText}>
                 Go to Profile → Verify Instagram, then come back here.
+              </Text>
+            </View>
+          ) : !igAdvancedEnabled(creator.ig_username) ? (
+            // Comment-triggered Auto-DM needs manage_comments (to detect the
+            // comment) — test-users-only until Instagram re-approves it. Hide
+            // the setup UI for public accounts so they don't hit dead calls.
+            <View style={styles.emptyCard}>
+              <Ionicons name="time-outline" size={28} color={colors.brand.primary} />
+              <Text style={styles.emptyTitle}>Coming soon</Text>
+              <Text style={styles.emptyText}>
+                Comment-triggered Auto-DM is awaiting Instagram’s approval and
+                will switch on automatically once it’s live.
               </Text>
             </View>
           ) : loading ? (
