@@ -374,16 +374,25 @@ export function summarizeEngagement(
     ? overallReach.reduce((a, b) => a + b, 0) / overallReach.length
     : null);
 
+  const avgLikes = n ? likes / n : null;
+  const avgComments = n ? comments / n : null;
+
+  // Standard engagement rate brands look at: (avg likes + avg comments per
+  // post) ÷ followers × 100. This lands in the low single digits, which is what
+  // the score bands in creatorScore.ts expect. Deliberately NOT reach-based:
+  // reach ÷ followers exceeds 100% for reels (non-follower reach) and needs the
+  // manage_insights permission — this works from like/comment counts alone, so
+  // the score shows for every connected account.
   const engagementPct =
-    avgReachOfReels != null && me.followers_count
-      ? (avgReachOfReels / me.followers_count) * 100
+    me.followers_count && avgLikes != null && avgComments != null
+      ? ((avgLikes + avgComments) / me.followers_count) * 100
       : null;
 
   return {
     followers: me.followers_count ?? null,
     mediaCount: me.media_count ?? null,
-    avgLikes: n ? likes / n : null,
-    avgComments: n ? comments / n : null,
+    avgLikes,
+    avgComments,
     engagementPct,
     avgReach
   };

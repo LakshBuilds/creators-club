@@ -107,17 +107,16 @@ export function CreatorScoreBadge({ summary: controlled }: Props = {}) {
 
             {summary?.engagementPct == null ? (
               <Text style={styles.help}>
-                Connect Instagram from Profile to compute your score. We need at least one reel older than 48 hours.
+                Connect Instagram from Profile to compute your score.
               </Text>
             ) : (
               <Text style={styles.help}>
                 This is your Engagement Rate, calculated using this formula:{"\n"}
                 <Text style={styles.helpFormula}>
-                  (avg reach of last 5 reels ÷ followers) × 100
+                  (avg likes + comments per post ÷ followers) × 100
                 </Text>{"\n\n"}
-                We only consider reels older than 48 hours, since reels usually take time to reach
-                their full audience. A higher rate means your content resonates well — brands love
-                to see this.
+                We average your recent posts. A higher rate means your audience actively
+                engages with your content — brands love to see this.
               </Text>
             )}
 

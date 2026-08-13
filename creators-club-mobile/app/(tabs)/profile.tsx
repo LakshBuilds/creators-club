@@ -267,19 +267,20 @@ export default function ProfileScreen() {
             value={formatCount(insights?.followers) ?? (savedHandle ? "—" : "0")}
           />
           <Divider />
-          {/* Engagement % and Avg Reach come from manage_insights — hidden for
-              public accounts until that permission is re-approved. */}
+          {/* Engagement % is like/comment-based now — no manage_insights needed,
+              so it shows for everyone. Only Avg Reach still needs that permission
+              and stays hidden for public accounts until it's re-approved. */}
+          <StatCard
+            label="Engagement %"
+            value={
+              insights?.engagementPct != null
+                ? `${insights.engagementPct.toFixed(1)}%`
+                : "—"
+            }
+          />
+          <Divider />
           {igAdvanced ? (
             <>
-              <StatCard
-                label="Engagement %"
-                value={
-                  insights?.engagementPct != null
-                    ? `${insights.engagementPct.toFixed(1)}%`
-                    : "—"
-                }
-              />
-              <Divider />
               <StatCard label="Avg Reach" value={formatCount(insights?.avgReach) ?? "—"} />
               <Divider />
             </>
@@ -321,10 +322,10 @@ export default function ProfileScreen() {
                 {savedHandle
                   ? igAdvanced
                     ? "Connected via Meta — followers, reach and engagement refresh automatically."
-                    : "Connected via Meta — your follower count refreshes automatically."
+                    : "Connected via Meta — followers and engagement refresh automatically."
                   : igAdvanced
                     ? "Login once — we fetch followers, reach, and engagement directly from Meta."
-                    : "Login once — we fetch your Instagram profile directly from Meta."}
+                    : "Login once — we fetch your followers and engagement directly from Meta."}
               </Text>
             </>
           )}
