@@ -19,6 +19,12 @@
         "simulator": true
       }
     },
+    "preview-ungated": {
+      "extends": "preview",
+      "env": {
+        "EXPO_PUBLIC_IG_ADVANCED": "1"
+      }
+    },
     "production": {
       "channel": "production",
       "autoIncrement": true,
